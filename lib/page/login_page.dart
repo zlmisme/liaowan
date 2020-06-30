@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:liaowan/router/routers.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -43,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void dispose() {
     _countDownTimer?.cancel();
-    _captchaEditController?.toString();
+    _captchaEditController?.dispose();
     super.dispose();
   }
 
@@ -54,13 +55,15 @@ class _LoginPageState extends State<LoginPage> {
     );
     SystemChrome.setSystemUIOverlayStyle(ui);
     return Scaffold(
-      body: Container(
-        color: Color.fromRGBO(246, 246, 246, 1),
-        child: Stack(
-          children: <Widget>[
-            _backgroud(),
-            _loginForm(),
-          ],
+      body: SingleChildScrollView(
+        child: Container(
+          color: Color.fromRGBO(246, 246, 246, 1),
+          child: Stack(
+            children: <Widget>[
+              _backgroud(),
+              _loginForm(),
+            ],
+          ),
         ),
       ),
     );
@@ -121,10 +124,15 @@ class _LoginPageState extends State<LoginPage> {
           LengthLimitingTextInputFormatter(11),
         ],
         onChanged: (value) {
-          setState(() {
-            _mobilePhone = value;
-          });
+          if (value != null && value.length > 11) {
+            return;
+          }
+          _mobilePhone = value;
+          if (_canLogin()) {
+            setState(() {});
+          }
         },
+        keyboardType: TextInputType.phone,
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: '请输入手机号',
@@ -159,14 +167,17 @@ class _LoginPageState extends State<LoginPage> {
       child: Row(
         children: <Widget>[
           Expanded(
-            flex: 1,
+            flex: 2,
             child: TextField(
               keyboardType: TextInputType.number,
               inputFormatters: [
                 LengthLimitingTextInputFormatter(4),
               ],
               onChanged: (value) {
-                print('onChanged $_captcha');
+                print('captcha onChanged $value');
+                if (value != null && value.length > 4) {
+                  return;
+                }
                 setState(() {
                   _captcha = value;
                 });
@@ -213,6 +224,11 @@ class _LoginPageState extends State<LoginPage> {
     bool sendingCaptcha = (_countDownTimer != null && _countDownTimer.isActive);
     return GestureDetector(
       onTap: () {
+        if (!_checkMobilePhone()) {
+          print('手机号码不正确');
+          return;
+        }
+
         _initCountDown();
       },
       child: Container(
@@ -277,6 +293,8 @@ class _LoginPageState extends State<LoginPage> {
         if (!canLogin) {
           return;
         }
+        FocusScope.of(context).requestFocus(FocusNode());
+        Routers.I.R.navigateTo(context, Routers.homePage, replace: true);
         // todo login
       },
       child: Container(
@@ -312,10 +330,15 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   bool _canLogin() {
-    return _mobilePhone != null &&
-        _mobilePhone.length == 11 &&
+    return _checkMobilePhone() &&
         _captcha != null &&
         _captcha.length == 4;
+  }
+
+  bool _checkMobilePhone() {
+    var regex = RegExp(r'^1[34578]\d{9}$');
+   return _mobilePhone != null &&
+        _mobilePhone.length == 11 && regex.hasMatch(_mobilePhone);
   }
 
   _pact() {

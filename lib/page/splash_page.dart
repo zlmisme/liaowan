@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:liaowan/page/login_page.dart';
+import 'package:liaowan/router/routers.dart';
 
 class SplashPage extends StatefulWidget {
   @override
@@ -27,12 +27,7 @@ class _SplashPageState extends State<SplashPage>
       print('status is $status');
       if (AnimationStatus.completed == status) {
         print('动画结束');
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LoginPage(),
-            ),
-            (route) => route == null);
+        Routers.I.R.navigateTo(context, Routers.loginPage, clearStack: true);
       }
     });
     super.initState();

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:liaowan/page/splash_page.dart';
+import 'package:liaowan/router/routers.dart';
 
 void main() {
+  Routers.I.init();
   runApp(MyApp());
 }
 
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: SplashPage(),
+      onGenerateRoute: Routers.I.R.generator,
     );
   }
 }
